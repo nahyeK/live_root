@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -23,10 +24,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ko">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white`}
       >
+        {/* Header is client component (dynamically imported without SSR) */}
+        {(() => {
+          const Header = dynamic(() => import("./components/Header"), { ssr: false });
+          return <Header />;
+        })()}
+
         {children}
       </body>
     </html>
