@@ -1,0 +1,79 @@
+// Prototype Prisma schema for local development using SQLite
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now())
+  tasks     Task[]   @relation("HostTasks")
+  applications Application[]
+  messages  Message[]
+  reviews   Review[]
+}
+
+model Task {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  date        DateTime?
+  location    String?
+  lat         Float?
+  lng         Float?
+  capacity    Int       @default(1)
+  rewardPoints Int      @default(0)
+  hostId      Int
+  host        User      @relation(fields: [hostId], references: [id], name: "HostTasks")
+  applications Application[]
+  createdAt   DateTime  @default(now())
+}
+
+model Application {
+  id        Int      @id @default(autoincrement())
+  task      Task     @relation(fields: [taskId], references: [id])
+  taskId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  status    AppStatus @default(PENDING)
+  createdAt DateTime @default(now())
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  fromId    Int
+  toId      Int
+  content   String
+  createdAt DateTime @default(now())
+  from      User     @relation("FromMessages", fields: [fromId], references: [id])
+  to        User     @relation("ToMessages", fields: [toId], references: [id])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  taskId    Int
+  userId    Int
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  STUDENT
+  HOST
+  ADMIN
+}
+
+enum AppStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
